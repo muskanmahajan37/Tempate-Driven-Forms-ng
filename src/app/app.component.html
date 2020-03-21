@@ -1,42 +1,204 @@
-<div class="container-fluid">
-  <h1>Bootcamp Enrollment Form</h1>
-  <form>
+<div class="container mt-4" style="max-width:500px">
+  <h1 class="text-center">Bootcamp Enrollment Form</h1>
+  <div class="alert alert-danger" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+  <form #userForm="ngForm" novalidate (ngSubmit)="onSubmit()" *ngIf='!formSubmitted'>
+       
+    <!--
+      novalidate,
+      this prevent browser validation to lick in when we exicute it
+    -->
+
+    <!-- {{ userForm.form.valid }} -->
+    <!-- above code is for whole form validation -->
+
+    <!-- {{ userForm.value | json}} -->
+    <!-- this is to test data bindind as declared in form tag -->
+    <!-- above is a test code in which we test the changes userForm.value json  -->
+    
+    <hr>
+
+    <!-- {{ userModel | json }} -->
+    <!-- this is to test model bindind data is binding from app.component.ts -->
+
+    <!-- both "data binding" and "module binding" can work together and seprately -->
+
     <div class="form-group">
       <label for="name">Name</label>
-      <input type="text" class="form-control" id="name"> 
+      <input type="text" class="form-control" id="name" name="userName" required placeholder="Enter Name"
+      [(ngModel)]="userModel.name" 
+      #name="ngModel" [class.is-invalid]="name.invalid && name.touched"> 
+    <!-- for error message a small tag is added after comments -->
+
+      <!-- {{ name.className }} -->
+      <!-- above code is for test purpose "#name"-->
+
+      <!-- {{ name.untouched }} -->
+      <!-- above code is for test of #name="ngModel" -->
+
+      <!-- 
+        [class.is-invalid]="name.invalid && name.touched"
+        class.is-invalid, points to css class "is-invalid" which will conditional applied when condition in brackets is valid
+        this is used to change the class when the form is invalid or when condition is true
+       -->
+
+      <!-- 
+         #name,
+         is used when we use associat the form for validation and states,e.g,  ng-untouched
+
+         #name="ngModel"
+         this is how we associate the reference with ngModel, e.g, untouched
+         this points to the ngModel of this perticular form control
+
+       -->
+
+      <!-- 
+        ngModel
+        this is binding of data in userForm as declared in form class
+
+        [ngModel]="userModel.name  
+        this is property binding in ngModel, and this os one way binding data moves from class to view but not opposite
+        
+        [(ngModel)]="userModel.name
+        this is banana in a box 2 way binding in which data flow from class to view and visa versa
+
+      -->
+      <small class="text-danger" [class.d-none]="name.valid || name.untouched">Name is Required</small>
+      <!-- d-none, is bootstrap class -->
+
     </div>
     <div class="form-group">
       <label for="email">Email</label>
-      <input type="email" id="email" class="form-control">
+      <input type="email" id="email" class="form-control" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+      placeholder="Enter Email"
+      [(ngModel)]="userModel.email" 
+      #email="ngModel" [class.is-invalid]="email.invalid && email.touched">
+      <div *ngIf="email.errors && (email.invalid && email.touched)">
+        <small class="text-danger" *ngIf="email.errors.required">Email is Required</small>
+        <small class="text-danger" *ngIf="email.errors.pattern">Email is not valid</small>
+      </div>
     </div>
+
     <div class="form-group">
-      <label for="phoneNum">Phone Number</label>
-      <input type="tel" id="phoneNum" class="form-control">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" class="form-control" name="phone" required pattern="[1-9]{1}[0-9]{9}" 
+      placeholder="Enter Phone Number"
+      [(ngModel)]="userModel.phone"
+      #phone="ngModel" [class.is-invalid]="phone.invalid && phone.touched">
+      <!-- <small class="text-danger" [class.d-none]="phone.valid || phone.untouched">
+        Invalid number, number must be of 10
+      </small>  -->
+      <div *ngIf="phone.errors && (phone.invalid && phone.touched)">
+        <small class="text-danger" *ngIf="phone.errors.required">This field is Required</small>
+        <small class="text-danger" *ngIf="phone.errors.pattern">The phone number must be of 10 Digits</small>
+      </div>
     </div>
+    <!-- 
+      <div *ngIf="phone.errors && (phone.invalid || phone.touched)">,
+        here we are using ngIf statement, which say if the condition is true only then this div will work
+        smae with, 2 small tags in that div
+        this is used when we need different error messages with for different mistakes, this increases the UI
+     -->
+
+    <!--
+      pattern="[1-9]{1}[0-9]{9}",
+      pattern is an html tag, and "[1-9]{1}[0-9]{9}" indicate follow
+      It is numeric
+      It will be max of 10 chars
+      First digit is not zero 
+    -->
+
+
+    <!-- 
+      <div ngModelGroup="address">
+      <div class="form-group">
+        <label for="street">Street</label>
+        <input type="text" id="street" class="form-control" name="street" ngModel>
+      </div>
+      <div class="form-group">
+        <label for="city">City</label>
+        <input type="city" id="city" class="form-control" name="city" ngModel>
+      </div>
+    </div> 
+    -->
+     <!-- above is an example of group model form, in this a json is created in json as a group -->
+
     <div class="form-group">
-      <select name="" id="" class="custom-select" placeholder="dael">
-        <option selected>I am interested in</option>
+      <label>Select topics</label>
+      <select name="topic" class="custom-select"  [(ngModel)]="userModel.topic" 
+      #topic="ngModel" [class.is-invalid]="topicHaveError && topic.touched"
+      (blur)="validateTopic(topic.value)" (change)="validateTopic(topic.value)">
+
+        <option value="default">I am interested in</option>
         <option *ngFor="let topic of topics">{{ topic }}</option>
       </select> 
+      <small class="text-danger" [class.d-none]="!topicHaveError || topic.untouched">Please choose a topic</small>
     </div>
+
+    <!-- 
+      blur, fired when you have moved away from an object or field
+      change, fired when the input or select type is changed
+     -->
+
+
     <div class="nb-3">
       <label>Time Preference</label>
       <div class="form-check">
-        <input type="radio" name="timePreference" value="morning" class="form-check-input">
+        <input type="radio" name="timePreference" value="Morning" class="form-check-input" [(ngModel)]="userModel.timePreference">
         <label class="form-check-label">Morning (9AM - 12PM)</label>
       </div>
       <div class="form-check">
-        <input type="radio" name="timePreference" value="evening" class="form-check-input">
+        <input type="radio" name="timePreference" value="Evening" class="form-check-input" [(ngModel)]="userModel.timePreference">
         <label class="form-check-label">Evening (5PM - 8PM)</label>
       </div>
     </div>
     <br>
     <div class="form-check mb-3">
-      <input type="checkbox" class="form-check-input">
+      <input type="checkbox" class="form-check-input" name="subscribe" [(ngModel)]="userModel.subscribe">
       <label class="form-check-label">Send me promotional offers</label>
     </div>
-    <button class="btn btn-primary" type="submit">Submir Form</button>
-  </form>  
+    <button [disabled]="userForm.form.invalid || topicHaveError" class="btn btn-primary" type="submit">Submir Form</button>
+    <!-- 
+      [disabled]="userForm.form.invalid"
+      this disable the form when it's not valid
+     -->
+  </form>
+  
+  <div *ngIf="formSubmitted" class="border border-success bg-dark mt-5">
+    <h1 class="text-center text-success">
+      Form Submitted
+    </h1>
+    <table class="table table-dark mb-2">
+        <tr>
+          <th>Name</th>
+          <td>{{ userModel.name }}</td>
+        </tr>
+        <tr>
+          <th>Email</th>
+          <td>{{ userModel.email }}</td>
+        </tr>
+        <tr>
+          <th>Phone Number</th>
+          <td>{{ userModel.phone }}</td>
+        </tr>
+        <tr>
+          <th>Topic</th>
+          <td>{{ userModel.topic }}</td>
+        </tr>
+        <tr>
+          <th>Time Preference</th>
+          <td>{{ userModel.timePreference }}</td>
+        </tr>
+        <tr>
+          <th>Subscribe</th>
+          <td>{{ userModel.subscribe }}</td>
+        </tr>
+    </table>
+    <div class="text-right text-muted">
+      <a (click)="newForm()" class="btn btn-dark font-weight-bold mb-2 mr-2">Click to submit a new form.</a>
+    </div>
+  </div>
 </div>
 
 
